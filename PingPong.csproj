@@ -9,7 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GEngine-R\GEngine-R.csproj" />
+    <Compile Remove="GEngine-R\**" />
+    <EmbeddedResource Remove="GEngine-R\**" />
+    <None Remove="GEngine-R\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="GEngine-R\GEngine-R.csproj" />
   </ItemGroup>
 
   <ItemGroup>
