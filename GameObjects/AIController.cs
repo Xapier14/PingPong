@@ -106,11 +106,13 @@ namespace PingPong.GameObjects
             int ballX = ball.Position.X;
             int ballY = ball.Position.Y;
 
+            // get player input
             bool playerUp = Input.IsDown(SDL_Keycode.SDLK_w) || Input.IsDown(SDL_Keycode.SDLK_a);
             bool playerDown = Input.IsDown(SDL_Keycode.SDLK_s) || Input.IsDown(SDL_Keycode.SDLK_d);
             bool playerServe = Input.IsDown(SDL_Keycode.SDLK_SPACE);
             bool playerSprint = Input.IsDown(SDL_Keycode.SDLK_LSHIFT);
 
+            // player paddle movement
             if (playerUp && !playerDown)
             {
                 playerY -= playerSprint ? PADDLE_PLAYER_SPRINT : PADDLE_PLAYER_SPEED;
@@ -120,12 +122,16 @@ namespace PingPong.GameObjects
                 playerY += playerSprint ? PADDLE_PLAYER_SPRINT : PADDLE_PLAYER_SPEED;
             }
 
+            // clamp movement to visible area
             if (playerY - Paddle.PADDLE_SIZE.H / 2 < 0)
                 playerY = Paddle.PADDLE_SIZE.H / 2;
             if (playerY + Paddle.PADDLE_SIZE.H / 2 > scene.ViewSize.H)
                 playerY = scene.ViewSize.H - Paddle.PADDLE_SIZE.H/2;
 
-            int aiTarget = scene.ViewSize.H / 2;
+            // set default ai target (idle)
+            int aiTarget = scene.ViewSize.H / 2; // not implemented idle behavior
+
+            // "check once" status
             bool check = ball.Get<bool>("check");
 
             // paddle collision
@@ -160,26 +166,35 @@ namespace PingPong.GameObjects
                     {
                         caller["serving"] = 0; // no serve
                         // set ball vel
-                        ball["speed"] = 8;
+                        ball["speed"] = 12;
                         ball["angle"] = 0.0;
                         ball["contact"] = DemoController.PredictBallContact(ball, ai, scene);
                     }
                     break;
                 case 2: // ai serve
-                    ballX = aiX - BALL_SERVE_DIST;
+                    ballX = aiX - BALL_SERVE_DIST - 1;
                     ballY = aiY;
                     break;
             }
+
+            /* AI BEHAVIOR */
 
             // ai move toward target if angle is toward ai paddle
             double ballAngle = ball.Get<double>("angle");
             if (serving == 0 &&
                 !(ballAngle > 90 && ballAngle < 270)) // angle not towards left side
             {
+                // get target position from last computed contact point
                 aiTarget = ball.Get<int>("contact");
+
+                // determine distance to target posistion
                 int distance = aiTarget - aiY;
+
+                // calculate movement value based on how far the distance is
                 double moveMod = Math.Max(1, Math.Abs(distance) / PADDLE_AI_MOVECONST);
                 int moveValue = (int)(PADDLE_AI_MOVEBASE * moveMod);
+
+                // apply movement
                 if (distance > 0)
                 {
                     if (aiY + Paddle.PADDLE_SIZE.H / 2 < scene.ViewSize.H)
@@ -189,6 +204,11 @@ namespace PingPong.GameObjects
                     if (aiY - Paddle.PADDLE_SIZE.H / 2 > 0)
                         aiY -= moveValue;
                 }
+            }
+            // if ai is serving
+            else if (serving == 2)
+            {
+
             }
 
             // update instances
