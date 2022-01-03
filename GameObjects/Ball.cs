@@ -111,8 +111,12 @@ namespace PingPong.GameObjects
             double angle = caller.Get<double>("angle");
             int speed = caller.Get<int>("speed");
 
-            double cos = Math.Cos(ToRad(angle)) * speed;
-            double sin = Math.Sin(ToRad(angle)) * speed;
+            // get x and y components
+            double cos = Math.Cos(ToRad(angle)) * speed; // x
+            double sin = Math.Sin(ToRad(angle)) * speed; // y
+            if (Math.Abs(sin) < 0.01)
+                sin = 0.0;
+            // determine sign
             int sC = cos > 0 ? 1 : cos < 0 ? -1 : 0;
             int sS = sin > 0 ? 1 : sin < 0 ? -1 : 0;
 
